@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>KOLAMAYA</title>
+<meta name="description" content="Generate beautiful traditional South Indian geometric patterns"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%235ba293'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle'%3E%F0%9F%AA%B7%3C/text%3E%3C/svg%3E"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=5.0.1"/>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="24" cy="24" r="2.4" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="24" r="1.8" fill="currentColor" stroke="none"/>
+            <circle cx="36" cy="24" r="1.8" fill="currentColor" stroke="none"/>
+            <circle cx="24" cy="12" r="1.8" fill="currentColor" stroke="none"/>
+            <circle cx="24" cy="36" r="1.8" fill="currentColor" stroke="none"/>
+            <path d="M24 5c7 0 7 12 0 12S17 5 24 5Zm0 38c-7 0-7-12 0-12s7 12 0 12ZM5 24c0-7 12-7 12 0S5 31 5 24Zm38 0c0 7-12 7-12 0s12-7 12 0Z"/>
+            <path d="M11.5 11.5c5-5 13.5 3.5 8.5 8.5s-13.5-3.5-8.5-8.5Zm25 25c-5 5-13.5-3.5-8.5-8.5s13.5 3.5 8.5 8.5Zm-25 0c-5-5 3.5-13.5 8.5-8.5s-3.5 13.5-8.5 8.5Zm25-25c5 5-3.5 13.5-8.5 8.5s3.5-13.5 8.5-8.5Z" opacity=".65"/>
+          </svg>
+        </div>
+        <div class="wordmark">
+          <div class="eyebrow">Pulli · Kodu · Samam</div>
+          <div class="wordmark-title">
+            <svg class="wordmark-kolam" viewBox="0 0 270 72" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" preserveAspectRatio="none">
+              <path d="M2 36C15 14 30 14 43 36s28 22 41 0 28-22 41 0 28 22 41 0 28-22 41 0 28 22 61 0"/>
+              <path d="M2 36c13 22 28 22 41 0s28-22 41 0 28 22 41 0 28-22 41 0 28 22 41 0 28-22 61 0" opacity=".62"/>
+              <path d="M25 10c12 0 12 18 0 18S13 10 25 10Zm220 52c-12 0-12-18 0-18s12 18 0 18Z" opacity=".78"/>
+              <circle cx="43" cy="36" r="2" fill="currentColor" stroke="none"/><circle cx="84" cy="36" r="2" fill="currentColor" stroke="none"/><circle cx="125" cy="36" r="2" fill="currentColor" stroke="none"/><circle cx="166" cy="36" r="2" fill="currentColor" stroke="none"/><circle cx="207" cy="36" r="2" fill="currentColor" stroke="none"/>
+            </svg>
+            <h1>KOLAMAYA</h1>
+          </div>
+        </div>
+      </div>
+      <div class="header-note offline" id="ai-status" title="The app works locally while it checks for the Flask vision API."><i aria-hidden="true"></i><span>Local vision mode</span></div>
+    </div>
+    <div class="hero-copy">
+      <p>Drawn from dots.<br/>Guided by <em>symmetry.</em></p>
+      <span>A contemporary creative studio for exploring the geometry, rhythm, and quiet beauty of South Indian kolam.</span>
+    </div>
+  </div>
+</header>
+
+<main class="kolam-editor">
+  <div class="max-w">
+
+    <nav class="tabs" aria-label="Kolam studio tools">
+      <button class="tab active" data-tab="generator" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="6" cy="12" r="1.2" fill="currentColor"/><circle cx="18" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="6" r="1.2" fill="currentColor"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/><path d="M12 2c3 0 3 5 0 5s-3-5 0-5Zm0 20c-3 0-3-5 0-5s3 5 0 5ZM2 12c0-3 5-3 5 0s-5 3-5 0Zm20 0c0 3-5 3-5 0s5-3 5 0Z"/></svg>
+        </span>
+        <span class="tab-copy"><b>Generator</b><small>Create new patterns</small></span>
+        <span class="tab-index">01</span>
+      </button>
+      <button class="tab" data-tab="complete" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18" stroke-dasharray="2.5 2.5"/><path d="M9 6.5C5.6 6.5 3 8.9 3 12s2.6 5.5 6 5.5"/><path d="M15 6.5c3.4 0 6 2.4 6 5.5s-2.6 5.5-6 5.5" opacity=".5"/><circle cx="7" cy="12" r="1.2" fill="currentColor"/><circle cx="17" cy="12" r="1.2" fill="currentColor" opacity=".5"/></svg>
+        </span>
+        <span class="tab-copy"><b>Half Completion</b><small>Restore with symmetry</small></span>
+        <span class="tab-index">02</span>
+      </button>
+      <button class="tab" data-tab="reconstruct" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h7v7H4z"/><path d="M13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke-dasharray="2 2" opacity=".52"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <span class="tab-copy"><b>Part to Whole</b><small>Predict from any fragment</small></span>
+        <span class="tab-index">03</span>
+      </button>
+      <button class="tab" data-tab="recreate" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5h9v9H5z" opacity=".5"/><path d="M10 10h9v9h-9z"/><path d="M15.5 3.5v4m-2-2h4"/><circle cx="14.5" cy="14.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <span class="tab-copy"><b>Recreator</b><small>Digitally redraw an image</small></span>
+        <span class="tab-index">04</span>
+      </button>
+      <button class="tab" data-tab="analyze" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M7.5 10.5h6M10.5 7.5v6" opacity=".65"/></svg>
+        </span>
+        <span class="tab-copy"><b>Analyzer</b><small>Measure form and balance</small></span>
+        <span class="tab-index">05</span>
+      </button>
+    </nav>
+
+    <!-- ================= GENERATOR ================= -->
+    <div class="tab-panel" id="panel-generator">
+      <div class="kolam-display-area">
+        <div class="panel-heading">
+          <div><span class="overline">Pattern preview</span><h2>Your kolam</h2></div>
+          <span class="canvas-status"><i aria-hidden="true"></i>Live canvas</span>
+        </div>
+        <div class="kolam-container" id="kolam-card">
+          <div class="download-menu">
+            <button class="dl-btn" id="dl-btn" title="Download options" aria-label="Open download options">↓</button>
+            <div class="dl-dropdown" id="dl-menu">
+              <button id="dl-svg">📄 Download SVG</button>
+              <button id="dl-png">🖼️ Download PNG</button>
+              <button id="dl-gif">🎞️ Download Animated GIF</button>
+              <hr/>
+              <button id="dl-embed">📋 Copy Embed Code</button>
+              <button id="dl-raw">📄 Copy Raw SVG</button>
+            </div>
+          </div>
+          <div id="kolam-svg-host"></div>
+        </div>
+      </div>
+
+      <div class="params-card">
+        <div class="card-overline">Fine-tune the geometry</div>
+        <h2><span aria-hidden="true">✦</span>Pattern controls</h2>
+        <p class="card-lead">Shape the grid, set the drawing pace, and generate a fresh symmetrical composition.</p>
+        <div class="params-grid">
+          <div class="parameter-group">
+            <label for="size-range">Grid Size</label>
+            <div class="slider-row">
+              <input id="size-range" type="range" min="3" max="15" value="7"/>
+              <div class="value-box" id="size-value">7</div>
+            </div>
+            <div class="hint" id="size-hint">Creates a 7x7 pattern grid</div>
+          </div>
+          <div class="parameter-group">
+            <label for="speed-range">Animation Duration</label>
+            <div class="slider-row">
+              <input id="speed-range" type="range" min="1" max="10" value="7"/>
+              <div class="value-box" id="speed-value">7</div>
+            </div>
+            <div class="hint" id="duration-hint">Total: 10.0s</div>
+          </div>
+        </div>
+        <div class="buttons-row">
+          <button class="btn" id="play-btn" title="Play Animation (P)">▶️ Play Animation</button>
+          <button class="btn" id="generate-btn" title="Generate Kolam (G)">Generate Kolam</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= HALF COMPLETION ================= -->
+    <div class="tab-panel hidden" id="panel-complete">
+      <div class="tool-intro">
+        <span class="overline">Symmetry workshop</span>
+        <h2>Complete half a kolam</h2>
+        <p>Upload a partial design. The studio detects its drawn side and restores the missing half through reflection.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1 · Input</h3>
+          <div class="drop-zone" id="complete-drop">
+            <input type="file" id="complete-file" accept="image/*" hidden/>
+            <div class="dz-inner">📁 <span>Drop a half-kolam image here or <u>click to upload</u></span></div>
+          </div>
+          <div class="field">
+            <label for="complete-axis">Symmetry axis</label>
+            <select id="complete-axis">
+              <option value="auto">Auto-detect</option>
+              <option value="vcenter">Vertical — mirror across centre</option>
+              <option value="hcenter">Horizontal — mirror across centre</option>
+              <option value="extend-right">Extend right (axis at right edge)</option>
+              <option value="extend-left">Extend left (axis at left edge)</option>
+              <option value="extend-down">Extend down (axis at bottom edge)</option>
+              <option value="extend-up">Extend up (axis at top edge)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="complete-engine">Completion engine</label>
+            <select id="complete-engine">
+              <option value="hybrid">Hybrid Vision v1 — demo ready</option>
+              <option value="unet">U-Net neural model — checkpoint required</option>
+            </select>
+            <div class="engine-note" id="engine-note">The deterministic hybrid engine is the default hackathon model.</div>
+          </div>
+          <div class="buttons-row">
+            <button class="btn green" id="complete-run" disabled>Mirror Complete</button>
+            <button class="btn gold" id="complete-tiles" disabled>Clean Rebuild (tiles)</button>
+            <button class="btn" id="complete-download" disabled>⬇ PNG</button>
+          </div>
+          <div class="hint" id="complete-status" style="color:#7c4a12">Upload an image to begin.</div>
+        </div>
+        <div class="tool-card">
+          <h3>2 · Result</h3>
+          <div class="result-grid">
+            <div><div class="cap">Input</div><canvas class="preview" id="complete-in"></canvas></div>
+            <div><div class="cap">Completed</div><canvas class="preview" id="complete-out"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PART-TO-WHOLE RECONSTRUCTION ================= -->
+    <div class="tab-panel hidden" id="panel-reconstruct">
+      <div class="tool-intro">
+        <span class="overline">Fragment intelligence</span>
+        <h2>Predict a complete kolam from any part</h2>
+        <p>Upload a visible fragment. KOLAMAYA analyzes its ink, grid clues, and likely position, then generates a plausible four-way symmetrical composition.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1 · Provide a fragment</h3>
+          <div class="drop-zone" id="fragment-drop">
+            <input type="file" id="fragment-file" accept="image/*" hidden/>
+            <div class="dz-inner">✣ <span>Drop any kolam fragment here or <u>click to upload</u></span></div>
+          </div>
+          <div class="field">
+            <label for="fragment-placement">Fragment position</label>
+            <select id="fragment-placement">
+              <option value="auto">Predict automatically</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-right">Bottom right</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fragment-style">Reconstruction hypothesis</label>
+            <select id="fragment-style">
+              <option value="mirror4">Four-way mirror symmetry</option>
+              <option value="rotational4">Four-fold rotational symmetry</option>
+            </select>
+          </div>
+          <div class="buttons-row" style="justify-content:flex-start">
+            <button class="btn green" id="fragment-run" disabled>Analyze &amp; Predict</button>
+            <button class="btn" id="fragment-download" disabled>⬇ PNG</button>
+          </div>
+          <div class="hint" id="fragment-status" style="color:#7c4a12">Upload one visible part of a kolam to begin.</div>
+          <div class="prediction-disclaimer">Prediction creates a geometrically plausible completion. Since the original is unknown, other valid kolams may also fit the same fragment.</div>
+        </div>
+        <div class="tool-card">
+          <h3>2 · Predicted complete kolam</h3>
+          <div class="result-grid">
+            <div><div class="cap">Provided fragment</div><canvas class="preview" id="fragment-in"></canvas></div>
+            <div><div class="cap">Predicted whole</div><canvas class="preview" id="fragment-out"></canvas></div>
+          </div>
+          <div id="fragment-analysis" class="fragment-analysis">
+            <div class="empty-state">Analysis, placement confidence, and grid clues will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= KOLAM RECREATOR ================= -->
+    <div class="tab-panel hidden" id="panel-recreate">
+      <div class="tool-intro">
+        <span class="overline">Digital craft restoration</span>
+        <h2>Recreate a kolam image</h2>
+        <p>Upload a complete kolam. KOLAMAYA recognizes its grid and curve vocabulary, then redraws it as a clean, presentation-ready digital pattern.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1 · Original image</h3>
+          <div class="drop-zone" id="recreator-drop">
+            <input type="file" id="recreator-file" accept="image/*" hidden/>
+            <div class="dz-inner">◈ <span>Drop a complete kolam image here or <u>click to upload</u></span></div>
+          </div>
+          <div class="field">
+            <label for="recreator-method">Recreation method</label>
+            <select id="recreator-method">
+              <option value="auto">Auto — rebuild known tiles when possible</option>
+              <option value="tiles">Geometric tile rebuild</option>
+              <option value="trace">Clean faithful trace</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recreator-palette">Output palette</label>
+            <select id="recreator-palette">
+              <option value="heritage">KOLAMAYA heritage — ivory on maroon</option>
+              <option value="monochrome">Classic monochrome — black on ivory</option>
+              <option value="original">Preserve estimated source colors</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recreator-thickness">Digital stroke weight</label>
+            <div class="slider-row">
+              <input id="recreator-thickness" type="range" min="1" max="5" step="0.5" value="2"/>
+              <div class="value-box" id="recreator-thickness-value">2</div>
+            </div>
+          </div>
+          <div class="buttons-row" style="justify-content:flex-start">
+            <button class="btn green" id="recreator-run" disabled>Recreate Kolam</button>
+            <button class="btn" id="recreator-download" disabled>⬇ PNG</button>
+          </div>
+          <div class="hint" id="recreator-status" style="color:#7c4a12">Upload a complete kolam image to begin.</div>
+          <div class="prediction-disclaimer">Auto mode rebuilds recognized curve tiles. When the dot grid is unclear, it automatically produces a cleaned high-contrast trace instead.</div>
+        </div>
+        <div class="tool-card">
+          <h3>2 · Clean digital recreation</h3>
+          <div class="result-grid">
+            <div><div class="cap">Original</div><canvas class="preview" id="recreator-in"></canvas></div>
+            <div><div class="cap">Recreated</div><canvas class="preview" id="recreator-out"></canvas></div>
+          </div>
+          <div id="recreator-analysis" class="fragment-analysis">
+            <div class="empty-state">Rebuild method, grid, tile fidelity, and symmetry will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= ANALYZER ================= -->
+    <div class="tab-panel hidden" id="panel-analyze">
+      <div class="tool-intro">
+        <span class="overline">Pattern study</span>
+        <h2>Kolam analyzer</h2>
+        <p>Upload a kolam to study its symmetry, dot-grid regularity, curve tiles, and overall balance.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>Input</h3>
+          <div class="drop-zone" id="analyze-drop">
+            <input type="file" id="analyze-file" accept="image/*" hidden/>
+            <div class="dz-inner">📁 <span>Drop a kolam image here or <u>click to upload</u></span></div>
+          </div>
+          <div class="buttons-row" style="justify-content:flex-start;margin-top:1rem">
+            <button class="btn green" id="analyze-run" disabled>Analyze</button>
+            <button class="btn" id="analyze-current">Analyze current kolam</button>
+          </div>
+          <div class="hint" id="analyze-status" style="color:#7c4a12">No image yet.</div>
+        </div>
+        <div class="tool-card" id="analyze-results">
+          <h3>Results</h3>
+          <div class="empty-state">Upload (or analyze the current) kolam to see its accuracy attributes.</div>
+        </div>
+      </div>
+      <div class="tool-card" style="margin-top:1.25rem">
+        <h3>Annotated view</h3>
+        <div class="annotated-cap" id="analyze-cap">No image</div>
+        <canvas class="annotated" id="analyze-canvas"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="inner">
+      <div class="footer-brand">
+        <div class="footer-seal" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="1.3" fill="currentColor"/><path d="M12 2c3.4 0 3.4 5.6 0 5.6S8.6 2 12 2Zm0 20c-3.4 0-3.4-5.6 0-5.6s3.4 5.6 0 5.6ZM2 12c0-3.4 5.6-3.4 5.6 0S2 15.4 2 12Zm20 0c0 3.4-5.6 3.4-5.6 0S22 8.6 22 12Z"/></svg>
+        </div>
+        <div><strong>KOLAMAYA</strong><small>Tradition, translated through geometry</small></div>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<div id="toast" role="status"></div>
+
+  <script src="assets/js/kolam-core.js?v=5.0.1"></script>
+  <script src="assets/js/kolam-vision.js?v=5.0.1"></script>
+  <script src="assets/js/app.js?v=5.0.1"></script>
+</body>
+</html>

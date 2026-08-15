@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.py": {
+      "maxDuration": 60,
+      "includeFiles": "{frontend/**,backend/models/tile_templates.json}"
+    }
+  }
+}
