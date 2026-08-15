@@ -3,10 +3,7 @@
   "functions": {
     "app.py": {
       "maxDuration": 60,
-      "includeFiles": [
-        "frontend/**",
-        "backend/models/tile_templates.json"
-      ]
+      "includeFiles": "{frontend/**,backend/models/tile_templates.json}"
     }
   }
 }
