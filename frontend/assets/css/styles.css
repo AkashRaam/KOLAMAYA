@@ -391,7 +391,7 @@ header .hero-copy p{
   position:relative;
   z-index:5;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:.75rem;
   margin:-2.4rem 0 2rem;
   padding:.65rem;
@@ -825,3 +825,27 @@ footer a span{font-size:.72rem;font-weight:700}
 .engine-note{margin-top:.45rem;color:#80675e;font-size:.67rem;line-height:1.45}
 .engine-pill{display:inline-flex;align-items:center;gap:.4rem;margin:0 0 .85rem;padding:.32rem .58rem;color:var(--teal-dark);border:1px solid rgba(40,111,102,.22);border-radius:999px;background:rgba(40,111,102,.08);font-size:.65rem;font-weight:800;letter-spacing:.045em;text-transform:uppercase}
 .engine-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal)}
+
+/* Part-to-whole fragment reconstruction */
+.prediction-disclaimer{
+  margin-top:1rem;
+  padding:.75rem .85rem;
+  color:#765b52;
+  border-left:3px solid var(--saffron);
+  border-radius:0 11px 11px 0;
+  background:#fbefdc;
+  font-size:.69rem;
+  line-height:1.55;
+}
+.fragment-analysis{margin-top:1rem;padding-top:.9rem;border-top:1px solid #ead9be}
+.fragment-analysis .empty-state{padding:1.1rem .5rem}
+.fragment-summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.fragment-confidence{font-family:Georgia,serif;color:var(--maroon);font-size:2rem;font-weight:700;line-height:1}
+.fragment-confidence small{display:block;margin-top:.25rem;color:#8a6c61;font-family:inherit;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.fragment-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.fragment-metric{padding:.65rem;border:1px solid #ead8bd;border-radius:12px;background:#fbf2e4}
+.fragment-metric span{display:block;color:#92756a;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.fragment-metric b{display:block;margin-top:.22rem;color:var(--ink);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:980px) and (min-width:641px){.tabs{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:460px){.fragment-metrics{grid-template-columns:1fr 1fr}}
+@media (max-width:1180px) and (min-width:981px){.tabs{grid-template-columns:repeat(3,1fr)}}

@@ -16,6 +16,11 @@ This distinction is intentional and suitable for an honest hackathon presentatio
 - Grid-size and drawing-speed controls
 - SVG, PNG, animated GIF, embed-code, and raw-SVG export
 - Half-kolam completion through the Flask API
+- Part-to-whole prediction from an arbitrary visible kolam fragment
+- Automatic fragment-position prediction with mirror or rotational reconstruction
+- Full-image Kolam Recreator with 16-tile digital rebuilding
+- Automatic clean-trace fallback for photographed or non-grid patterns
+- Heritage, monochrome, and source-color recreation palettes
 - Browser-side fallback when the backend is unavailable
 - Symmetry, dot-grid, tile-confidence, and overall-accuracy analysis
 - Explainable 16-class curve-tile classifier
@@ -91,6 +96,8 @@ The Vercel build uses the lightweight Hybrid Vision Engine. See `docs/VERCEL_DEP
 | GET | `/api/docs` | Machine-readable API summary |
 | POST | `/api/analyze` | Analyze an uploaded kolam |
 | POST | `/api/complete` | Complete an uploaded half-kolam |
+| POST | `/api/reconstruct` | Predict a complete kolam from any visible fragment |
+| POST | `/api/recreate` | Redraw a complete uploaded kolam as a clean digital pattern |
 
 ### Analyze example
 
@@ -110,6 +117,33 @@ curl -X POST \
 ```
 
 Completion modes: `auto`, `vcenter`, `hcenter`, `extend-right`, `extend-left`, `extend-down`, and `extend-up`.
+
+### Part-to-whole reconstruction example
+
+```bash
+curl -X POST \
+  -F "image=@kolam-fragment.png" \
+  -F "placement=auto" \
+  -F "style=mirror4" \
+  http://localhost:5000/api/reconstruct \
+  --output predicted-kolam.png
+```
+
+Reconstruction styles are `mirror4` and `rotational4`. This endpoint generates a plausible symmetry-based completion; it cannot guarantee that the unknown original used the same continuation.
+
+### Recreator example
+
+```bash
+curl -X POST \
+  -F "image=@complete-kolam.png" \
+  -F "method=auto" \
+  -F "palette=heritage" \
+  -F "thickness=2" \
+  http://localhost:5000/api/recreate \
+  --output recreated-kolam.png
+```
+
+`auto` uses the known 16-tile vocabulary when a stable dot grid is recognized and falls back to a clean digital trace otherwise. Methods: `auto`, `tiles`, `trace`. Palettes: `heritage`, `monochrome`, `original`.
 
 ## Train the optional U-Net
 
@@ -162,6 +196,8 @@ KOLAMAYA-hackathon/
 │   ├── routes/api.py
 │   ├── services/
 │   │   ├── hybrid_vision.py
+│   │   ├── fragment_reconstruction.py
+│   │   ├── kolam_recreator.py
 │   │   ├── tile_classifier.py
 │   │   └── unet_service.py
 │   ├── models/

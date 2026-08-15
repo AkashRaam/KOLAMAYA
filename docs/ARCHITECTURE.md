@@ -11,6 +11,10 @@ flowchart LR
     H --> L[Dot-Lattice Detector]
     H --> T[16-Tile Template Classifier]
     H --> R[Reflection Completion]
+    API --> P[Part-to-Whole Reconstruction]
+    P --> Q[Placement Prediction + Mirror or Rotation]
+    API --> C[Kolam Recreator]
+    C --> D[16-Tile Rebuild or Clean Trace]
     API -. checkpoint available .-> N[PyTorch U-Net]
     UI -->|API unavailable| F[Browser Vision Fallback]
 ```

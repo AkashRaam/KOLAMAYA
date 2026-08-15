@@ -44,7 +44,28 @@
 - Tile matching works best for patterns close to the included 16-tile vocabulary.
 - Reflection completion assumes an appropriate axis selected by the user or auto-detector.
 
-## 2. Neural extension
+## 2. Fragment reconstruction model
+
+**Name:** KOLAMAYA Part-to-Whole Engine v1  
+**Identifier:** `kolamaya-fragment-v1`  
+**Type:** Explainable symmetry-hypothesis generator  
+**Training:** None  
+**Input:** Any visible kolam fragment with sufficient contrast
+
+The engine segments the visible strokes, estimates the fragment's likely quadrant from its position and surrounding whitespace, extracts grid clues, and constructs either a four-way mirror or four-fold rotational completion. Its confidence score combines placement certainty, stroke/background contrast, and lattice evidence.
+
+The generated result is one geometrically plausible completion. An arbitrary fragment usually does not contain enough information to recover a unique original design, so the interface and API explicitly communicate this uncertainty.
+
+## 3. Kolam Recreator
+
+**Name:** KOLAMAYA Recreator v1  
+**Identifier:** `kolamaya-recreator-v1`  
+**Type:** Known-tile digital rebuilder with clean-trace fallback  
+**Training:** None
+
+The Recreator analyzes a complete uploaded image. When it recognizes a stable dot lattice and cells from the 16-tile vocabulary, it redraws every dot and curve from normalized geometric source templates. Otherwise it segments and smooths the visible strokes into a clean high-contrast trace. The reconstruction report exposes which method was used, grid size, tile confidence, symmetry, and recreation score.
+
+## 4. Neural extension
 
 **Name:** KOLAMAYA U-Net v1  
 **Identifier:** `kolamaya-unet-v1`  
@@ -74,10 +95,10 @@ Synthetic data is useful for pipeline validation but does not represent the full
 - Performance by image source: generated, scanned, photographed, and hand-drawn
 - Failure-case documentation
 
-## 3. Transparency statement for judges
+## 5. Transparency statement for judges
 
 The live demo is powered by the deterministic hybrid engine unless `/api/health` reports `unetReady: true`. The source code never silently labels the heuristic engine as a trained model. The API, interface status badge, and this model card expose the active engine.
 
-## 4. Privacy
+## 6. Privacy
 
 Uploaded images are processed in memory. The included Flask application does not save uploads, predictions, or personal metadata.

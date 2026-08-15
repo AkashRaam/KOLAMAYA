@@ -6,7 +6,7 @@
 <title>KOLAMAYA</title>
 <meta name="description" content="Generate beautiful traditional South Indian geometric patterns"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%235ba293'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle'%3E%F0%9F%AA%B7%3C/text%3E%3C/svg%3E"/>
-  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=5.0.1"/>
 </head>
 <body>
 <header>
@@ -64,12 +64,26 @@
         <span class="tab-copy"><b>Half Completion</b><small>Restore with symmetry</small></span>
         <span class="tab-index">02</span>
       </button>
+      <button class="tab" data-tab="reconstruct" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h7v7H4z"/><path d="M13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke-dasharray="2 2" opacity=".52"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <span class="tab-copy"><b>Part to Whole</b><small>Predict from any fragment</small></span>
+        <span class="tab-index">03</span>
+      </button>
+      <button class="tab" data-tab="recreate" type="button">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5h9v9H5z" opacity=".5"/><path d="M10 10h9v9h-9z"/><path d="M15.5 3.5v4m-2-2h4"/><circle cx="14.5" cy="14.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <span class="tab-copy"><b>Recreator</b><small>Digitally redraw an image</small></span>
+        <span class="tab-index">04</span>
+      </button>
       <button class="tab" data-tab="analyze" type="button">
         <span class="tab-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M7.5 10.5h6M10.5 7.5v6" opacity=".65"/></svg>
         </span>
         <span class="tab-copy"><b>Analyzer</b><small>Measure form and balance</small></span>
-        <span class="tab-index">03</span>
+        <span class="tab-index">05</span>
       </button>
     </nav>
 
@@ -176,6 +190,114 @@
       </div>
     </div>
 
+    <!-- ================= PART-TO-WHOLE RECONSTRUCTION ================= -->
+    <div class="tab-panel hidden" id="panel-reconstruct">
+      <div class="tool-intro">
+        <span class="overline">Fragment intelligence</span>
+        <h2>Predict a complete kolam from any part</h2>
+        <p>Upload a visible fragment. KOLAMAYA analyzes its ink, grid clues, and likely position, then generates a plausible four-way symmetrical composition.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1 · Provide a fragment</h3>
+          <div class="drop-zone" id="fragment-drop">
+            <input type="file" id="fragment-file" accept="image/*" hidden/>
+            <div class="dz-inner">✣ <span>Drop any kolam fragment here or <u>click to upload</u></span></div>
+          </div>
+          <div class="field">
+            <label for="fragment-placement">Fragment position</label>
+            <select id="fragment-placement">
+              <option value="auto">Predict automatically</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-right">Bottom right</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fragment-style">Reconstruction hypothesis</label>
+            <select id="fragment-style">
+              <option value="mirror4">Four-way mirror symmetry</option>
+              <option value="rotational4">Four-fold rotational symmetry</option>
+            </select>
+          </div>
+          <div class="buttons-row" style="justify-content:flex-start">
+            <button class="btn green" id="fragment-run" disabled>Analyze &amp; Predict</button>
+            <button class="btn" id="fragment-download" disabled>⬇ PNG</button>
+          </div>
+          <div class="hint" id="fragment-status" style="color:#7c4a12">Upload one visible part of a kolam to begin.</div>
+          <div class="prediction-disclaimer">Prediction creates a geometrically plausible completion. Since the original is unknown, other valid kolams may also fit the same fragment.</div>
+        </div>
+        <div class="tool-card">
+          <h3>2 · Predicted complete kolam</h3>
+          <div class="result-grid">
+            <div><div class="cap">Provided fragment</div><canvas class="preview" id="fragment-in"></canvas></div>
+            <div><div class="cap">Predicted whole</div><canvas class="preview" id="fragment-out"></canvas></div>
+          </div>
+          <div id="fragment-analysis" class="fragment-analysis">
+            <div class="empty-state">Analysis, placement confidence, and grid clues will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= KOLAM RECREATOR ================= -->
+    <div class="tab-panel hidden" id="panel-recreate">
+      <div class="tool-intro">
+        <span class="overline">Digital craft restoration</span>
+        <h2>Recreate a kolam image</h2>
+        <p>Upload a complete kolam. KOLAMAYA recognizes its grid and curve vocabulary, then redraws it as a clean, presentation-ready digital pattern.</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1 · Original image</h3>
+          <div class="drop-zone" id="recreator-drop">
+            <input type="file" id="recreator-file" accept="image/*" hidden/>
+            <div class="dz-inner">◈ <span>Drop a complete kolam image here or <u>click to upload</u></span></div>
+          </div>
+          <div class="field">
+            <label for="recreator-method">Recreation method</label>
+            <select id="recreator-method">
+              <option value="auto">Auto — rebuild known tiles when possible</option>
+              <option value="tiles">Geometric tile rebuild</option>
+              <option value="trace">Clean faithful trace</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recreator-palette">Output palette</label>
+            <select id="recreator-palette">
+              <option value="heritage">KOLAMAYA heritage — ivory on maroon</option>
+              <option value="monochrome">Classic monochrome — black on ivory</option>
+              <option value="original">Preserve estimated source colors</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recreator-thickness">Digital stroke weight</label>
+            <div class="slider-row">
+              <input id="recreator-thickness" type="range" min="1" max="5" step="0.5" value="2"/>
+              <div class="value-box" id="recreator-thickness-value">2</div>
+            </div>
+          </div>
+          <div class="buttons-row" style="justify-content:flex-start">
+            <button class="btn green" id="recreator-run" disabled>Recreate Kolam</button>
+            <button class="btn" id="recreator-download" disabled>⬇ PNG</button>
+          </div>
+          <div class="hint" id="recreator-status" style="color:#7c4a12">Upload a complete kolam image to begin.</div>
+          <div class="prediction-disclaimer">Auto mode rebuilds recognized curve tiles. When the dot grid is unclear, it automatically produces a cleaned high-contrast trace instead.</div>
+        </div>
+        <div class="tool-card">
+          <h3>2 · Clean digital recreation</h3>
+          <div class="result-grid">
+            <div><div class="cap">Original</div><canvas class="preview" id="recreator-in"></canvas></div>
+            <div><div class="cap">Recreated</div><canvas class="preview" id="recreator-out"></canvas></div>
+          </div>
+          <div id="recreator-analysis" class="fragment-analysis">
+            <div class="empty-state">Rebuild method, grid, tile fidelity, and symmetry will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ================= ANALYZER ================= -->
     <div class="tab-panel hidden" id="panel-analyze">
       <div class="tool-intro">
@@ -224,8 +346,8 @@
 
 <div id="toast" role="status"></div>
 
-  <script src="assets/js/kolam-core.js"></script>
-  <script src="assets/js/kolam-vision.js"></script>
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/kolam-core.js?v=5.0.1"></script>
+  <script src="assets/js/kolam-vision.js?v=5.0.1"></script>
+  <script src="assets/js/app.js?v=5.0.1"></script>
 </body>
 </html>

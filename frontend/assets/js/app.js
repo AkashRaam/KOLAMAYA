@@ -616,7 +616,7 @@
     document.querySelectorAll(".tab").forEach(function (t) {
       t.classList.toggle("active", t.getAttribute("data-tab") === name);
     });
-    ["generator", "complete", "analyze"].forEach(function (n) {
+    ["generator", "complete", "reconstruct", "recreate", "analyze"].forEach(function (n) {
       var p = document.getElementById("panel-" + n);
       p.classList.toggle("hidden", n !== name);
     });
@@ -819,6 +819,380 @@
     }, "image/png");
   }
 
+  /* ---------------- part-to-whole reconstruction ---------------- */
+  var fragmentImage = null;
+  var fragmentSourceFile = null;
+  var fragmentOutput = null;
+
+  function onFragmentFile(file) {
+    fragmentSourceFile = file;
+    readFileToImage(file, function (img) {
+      fragmentImage = img;
+      drawImageFit(img, document.getElementById("fragment-in"), 360);
+      document.getElementById("fragment-run").disabled = false;
+      document.getElementById("fragment-status").textContent =
+        "Fragment loaded (" + (img.naturalWidth || img.width) + "×" + (img.naturalHeight || img.height) + "). Analyzing its structure…";
+      runFragmentReconstruction();
+    });
+  }
+
+  function humanizeFragmentValue(value) {
+    return String(value || "unknown").replace(/-/g, " ").replace(/\b\w/g, function (letter) {
+      return letter.toUpperCase();
+    });
+  }
+
+  function renderFragmentAnalysis(meta) {
+    var confidence = parseFloat(meta.confidence || 0);
+    document.getElementById("fragment-analysis").innerHTML =
+      '<div class="fragment-summary">' +
+        '<div><span class="overline">Prediction report</span><b style="font-family:Georgia,serif;color:#2b1714">Symmetry hypothesis</b></div>' +
+        '<div class="fragment-confidence">' + Math.round(confidence) + '%<small>confidence</small></div>' +
+      '</div>' +
+      '<div class="fragment-metrics">' +
+        '<div class="fragment-metric"><span>Position</span><b>' + humanizeFragmentValue(meta.placement) + '</b></div>' +
+        '<div class="fragment-metric"><span>Style</span><b>' + humanizeFragmentValue(meta.style) + '</b></div>' +
+        '<div class="fragment-metric"><span>Grid clue</span><b>' + (meta.grid || "Not detected") + '</b></div>' +
+        '<div class="fragment-metric"><span>Ink coverage</span><b>' + (meta.coverage || "—") + '%</b></div>' +
+        '<div class="fragment-metric"><span>Grid spacing</span><b>' + (meta.spacing || "—") + ' px</b></div>' +
+        '<div class="fragment-metric"><span>Engine</span><b>' + humanizeFragmentValue(meta.engine || "browser fallback") + '</b></div>' +
+      '</div>';
+  }
+
+  function finishFragmentImage(img, meta) {
+    var data = imageToImageData(img);
+    fragmentOutput = {
+      width: data.width,
+      height: data.height,
+      data: new Uint8ClampedArray(data.data)
+    };
+    putImageDataToCanvas(fragmentOutput, document.getElementById("fragment-out"), 440);
+    document.getElementById("fragment-download").disabled = false;
+    renderFragmentAnalysis(meta);
+    document.getElementById("fragment-status").textContent =
+      "Predicted a " + data.width + "×" + data.height + " complete kolam from the supplied fragment.";
+  }
+
+  function transformFragmentCanvas(source, placement) {
+    var canvas = document.createElement("canvas");
+    canvas.width = source.width;
+    canvas.height = source.height;
+    var ctx = canvas.getContext("2d");
+    ctx.save();
+    if (placement === "top-right") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+    else if (placement === "bottom-left") { ctx.translate(0, canvas.height); ctx.scale(1, -1); }
+    else if (placement === "bottom-right") { ctx.translate(canvas.width, canvas.height); ctx.scale(-1, -1); }
+    ctx.drawImage(source, 0, 0);
+    ctx.restore();
+    return canvas;
+  }
+
+  function rotateSquare(source, turns) {
+    var canvas = document.createElement("canvas");
+    canvas.width = source.width;
+    canvas.height = source.height;
+    var ctx = canvas.getContext("2d");
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(turns * Math.PI / 2);
+    ctx.drawImage(source, -source.width / 2, -source.height / 2);
+    return canvas;
+  }
+
+  function runFragmentLocal() {
+    var naturalW = fragmentImage.naturalWidth || fragmentImage.width;
+    var naturalH = fragmentImage.naturalHeight || fragmentImage.height;
+    var scale = Math.min(1, 600 / Math.max(naturalW, naturalH));
+    var source = document.createElement("canvas");
+    source.width = Math.max(2, Math.round(naturalW * scale));
+    source.height = Math.max(2, Math.round(naturalH * scale));
+    source.getContext("2d").drawImage(fragmentImage, 0, 0, source.width, source.height);
+    var placement = document.getElementById("fragment-placement").value;
+    if (placement === "auto") placement = "top-left";
+    var style = document.getElementById("fragment-style").value;
+    var canonical = transformFragmentCanvas(source, placement);
+    var output = document.createElement("canvas");
+    var ctx;
+
+    if (style === "rotational4") {
+      var q = Math.max(canonical.width, canonical.height);
+      var tile = document.createElement("canvas");
+      tile.width = q; tile.height = q;
+      tile.getContext("2d").drawImage(canonical, (q - canonical.width) / 2, (q - canonical.height) / 2);
+      output.width = q * 2; output.height = q * 2; ctx = output.getContext("2d");
+      ctx.drawImage(tile, 0, 0);
+      ctx.drawImage(rotateSquare(tile, -1), q, 0);
+      ctx.drawImage(rotateSquare(tile, 1), 0, q);
+      ctx.drawImage(rotateSquare(tile, 2), q, q);
+    } else {
+      var w = canonical.width, h = canonical.height;
+      output.width = w * 2; output.height = h * 2; ctx = output.getContext("2d");
+      ctx.drawImage(canonical, 0, 0);
+      ctx.save(); ctx.translate(w * 2, 0); ctx.scale(-1, 1); ctx.drawImage(canonical, 0, 0); ctx.restore();
+      ctx.save(); ctx.translate(0, h * 2); ctx.scale(1, -1); ctx.drawImage(canonical, 0, 0); ctx.restore();
+      ctx.save(); ctx.translate(w * 2, h * 2); ctx.scale(-1, -1); ctx.drawImage(canonical, 0, 0); ctx.restore();
+    }
+    var data = output.getContext("2d").getImageData(0, 0, output.width, output.height);
+    fragmentOutput = { width: output.width, height: output.height, data: new Uint8ClampedArray(data.data) };
+    putImageDataToCanvas(fragmentOutput, document.getElementById("fragment-out"), 440);
+    document.getElementById("fragment-download").disabled = false;
+    renderFragmentAnalysis({
+      confidence: 48,
+      placement: placement,
+      style: style,
+      grid: "Local fallback",
+      coverage: "—",
+      spacing: "—",
+      engine: "browser fallback"
+    });
+    document.getElementById("fragment-status").textContent =
+      "Backend unavailable; generated a browser-based symmetry hypothesis.";
+  }
+
+  function runFragmentReconstruction() {
+    if (!fragmentImage) return;
+    if (!backendAvailable || !fragmentSourceFile) {
+      runFragmentLocal();
+      return;
+    }
+    var placement = document.getElementById("fragment-placement").value;
+    var style = document.getElementById("fragment-style").value;
+    var runButton = document.getElementById("fragment-run");
+    runButton.disabled = true;
+    document.getElementById("fragment-status").textContent =
+      "Analyzing fragment, predicting placement, and generating the complete kolam…";
+    var form = new FormData();
+    form.append("image", fragmentSourceFile, fragmentSourceFile.name || "fragment.png");
+    form.append("placement", placement);
+    form.append("style", style);
+
+    fetch("/api/reconstruct", { method: "POST", body: form })
+      .then(function (response) {
+        if (!response.ok) {
+          return response.json().catch(function () { return {}; }).then(function (body) {
+            throw new Error(body.error || "Fragment reconstruction failed.");
+          });
+        }
+        var meta = {
+          engine: response.headers.get("X-Kolamaya-Engine"),
+          placement: response.headers.get("X-Kolamaya-Placement"),
+          style: response.headers.get("X-Kolamaya-Style"),
+          confidence: response.headers.get("X-Kolamaya-Confidence"),
+          coverage: response.headers.get("X-Kolamaya-Coverage"),
+          grid: response.headers.get("X-Kolamaya-Grid"),
+          spacing: response.headers.get("X-Kolamaya-Spacing")
+        };
+        return response.blob().then(function (blob) { return { blob: blob, meta: meta }; });
+      })
+      .then(function (result) {
+        var url = URL.createObjectURL(result.blob);
+        var image = new Image();
+        image.onload = function () {
+          finishFragmentImage(image, result.meta);
+          URL.revokeObjectURL(url);
+          runButton.disabled = false;
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          runButton.disabled = false;
+          toast("The prediction was generated but could not be displayed.");
+        };
+        image.src = url;
+      })
+      .catch(function (error) {
+        console.warn("Fragment API unavailable; using local fallback.", error);
+        toast(error.message + " Using browser symmetry instead.");
+        runFragmentLocal();
+        runButton.disabled = false;
+      });
+  }
+
+  function downloadFragment() {
+    if (!fragmentOutput) return;
+    var canvas = document.createElement("canvas");
+    canvas.width = fragmentOutput.width;
+    canvas.height = fragmentOutput.height;
+    canvas.getContext("2d").putImageData(
+      new ImageData(new Uint8ClampedArray(fragmentOutput.data), canvas.width, canvas.height), 0, 0
+    );
+    canvas.toBlob(function (blob) {
+      if (blob) downloadBlob(blob, "kolamaya-fragment-reconstruction.png");
+      else toast("PNG export failed.");
+    }, "image/png");
+  }
+
+  /* ---------------- kolam recreator ---------------- */
+  var recreatorImage = null;
+  var recreatorSourceFile = null;
+  var recreatorOutput = null;
+
+  function onRecreatorFile(file) {
+    recreatorSourceFile = file;
+    readFileToImage(file, function (img) {
+      recreatorImage = img;
+      drawImageFit(img, document.getElementById("recreator-in"), 360);
+      document.getElementById("recreator-run").disabled = false;
+      document.getElementById("recreator-status").textContent =
+        "Image loaded (" + (img.naturalWidth || img.width) + "×" + (img.naturalHeight || img.height) + "). Recognizing its structure…";
+      runRecreator();
+    });
+  }
+
+  function renderRecreatorAnalysis(meta) {
+    var confidence = parseFloat(meta.confidence || 0);
+    document.getElementById("recreator-analysis").innerHTML =
+      '<div class="fragment-summary">' +
+        '<div><span class="overline">Recreation report</span><b style="font-family:Georgia,serif;color:#2b1714">Digital rebuild</b></div>' +
+        '<div class="fragment-confidence">' + Math.round(confidence) + '%<small>recreation score</small></div>' +
+      '</div>' +
+      '<div class="fragment-metrics">' +
+        '<div class="fragment-metric"><span>Method</span><b>' + humanizeFragmentValue(meta.method) + '</b></div>' +
+        '<div class="fragment-metric"><span>Grid</span><b>' + (meta.grid || "Not detected") + '</b></div>' +
+        '<div class="fragment-metric"><span>Cells</span><b>' + (meta.cells || "—") + '</b></div>' +
+        '<div class="fragment-metric"><span>Tile fidelity</span><b>' + (meta.tileConfidence || "0") + '%</b></div>' +
+        '<div class="fragment-metric"><span>Symmetry</span><b>' + (meta.symmetry || "—") + '%</b></div>' +
+        '<div class="fragment-metric"><span>Palette</span><b>' + humanizeFragmentValue(meta.palette) + '</b></div>' +
+      '</div>';
+  }
+
+  function finishRecreatorImage(img, meta) {
+    var data = imageToImageData(img);
+    recreatorOutput = {
+      width: data.width,
+      height: data.height,
+      data: new Uint8ClampedArray(data.data)
+    };
+    putImageDataToCanvas(recreatorOutput, document.getElementById("recreator-out"), 440);
+    document.getElementById("recreator-download").disabled = false;
+    renderRecreatorAnalysis(meta);
+    document.getElementById("recreator-status").textContent =
+      "Recreated as a " + data.width + "×" + data.height + " clean digital kolam using " + humanizeFragmentValue(meta.method) + ".";
+  }
+
+  function recreatorPalette(name, background) {
+    if (name === "monochrome") return { bg: [255, 253, 248], ink: [35, 24, 21] };
+    if (name === "original") {
+      var brightness = (background[0] + background[1] + background[2]) / 3;
+      return { bg: background, ink: brightness > 128 ? [25, 20, 18] : [255, 250, 240] };
+    }
+    return { bg: [72, 29, 36], ink: [255, 250, 240] };
+  }
+
+  function runRecreatorLocal() {
+    var naturalW = recreatorImage.naturalWidth || recreatorImage.width;
+    var naturalH = recreatorImage.naturalHeight || recreatorImage.height;
+    var scale = Math.min(1, 900 / Math.max(naturalW, naturalH));
+    var source = document.createElement("canvas");
+    source.width = Math.max(2, Math.round(naturalW * scale));
+    source.height = Math.max(2, Math.round(naturalH * scale));
+    var sourceCtx = source.getContext("2d");
+    sourceCtx.drawImage(recreatorImage, 0, 0, source.width, source.height);
+    var imageData = sourceCtx.getImageData(0, 0, source.width, source.height);
+    var pixels = imageData.data;
+    var background = [pixels[0], pixels[1], pixels[2]];
+    var paletteName = document.getElementById("recreator-palette").value;
+    var palette = recreatorPalette(paletteName, background);
+    var output = sourceCtx.createImageData(source.width, source.height);
+    for (var i = 0; i < pixels.length; i += 4) {
+      var difference = Math.max(
+        Math.abs(pixels[i] - background[0]),
+        Math.abs(pixels[i + 1] - background[1]),
+        Math.abs(pixels[i + 2] - background[2])
+      );
+      var color = difference > 55 ? palette.ink : palette.bg;
+      output.data[i] = color[0]; output.data[i + 1] = color[1]; output.data[i + 2] = color[2]; output.data[i + 3] = 255;
+    }
+    recreatorOutput = { width: output.width, height: output.height, data: new Uint8ClampedArray(output.data) };
+    putImageDataToCanvas(recreatorOutput, document.getElementById("recreator-out"), 440);
+    document.getElementById("recreator-download").disabled = false;
+    renderRecreatorAnalysis({
+      confidence: 55,
+      method: "browser clean trace",
+      grid: "Not analyzed",
+      cells: "—",
+      tileConfidence: 0,
+      symmetry: "—",
+      palette: paletteName
+    });
+    document.getElementById("recreator-status").textContent =
+      "Backend unavailable; produced a browser-based clean trace.";
+  }
+
+  function runRecreator() {
+    if (!recreatorImage) return;
+    if (!backendAvailable || !recreatorSourceFile) {
+      runRecreatorLocal();
+      return;
+    }
+    var method = document.getElementById("recreator-method").value;
+    var palette = document.getElementById("recreator-palette").value;
+    var thickness = document.getElementById("recreator-thickness").value;
+    var runButton = document.getElementById("recreator-run");
+    runButton.disabled = true;
+    document.getElementById("recreator-status").textContent =
+      "Analyzing the grid and redrawing the kolam with clean digital geometry…";
+    var form = new FormData();
+    form.append("image", recreatorSourceFile, recreatorSourceFile.name || "kolam.png");
+    form.append("method", method);
+    form.append("palette", palette);
+    form.append("thickness", thickness);
+
+    fetch("/api/recreate", { method: "POST", body: form })
+      .then(function (response) {
+        if (!response.ok) {
+          return response.json().catch(function () { return {}; }).then(function (body) {
+            throw new Error(body.error || "Kolam recreation failed.");
+          });
+        }
+        var meta = {
+          engine: response.headers.get("X-Kolamaya-Engine"),
+          method: response.headers.get("X-Kolamaya-Method"),
+          palette: response.headers.get("X-Kolamaya-Palette"),
+          confidence: response.headers.get("X-Kolamaya-Confidence"),
+          grid: response.headers.get("X-Kolamaya-Grid"),
+          gridRegularity: response.headers.get("X-Kolamaya-Grid-Regularity"),
+          tileConfidence: response.headers.get("X-Kolamaya-Tile-Confidence"),
+          symmetry: response.headers.get("X-Kolamaya-Symmetry"),
+          cells: response.headers.get("X-Kolamaya-Cells")
+        };
+        return response.blob().then(function (blob) { return { blob: blob, meta: meta }; });
+      })
+      .then(function (result) {
+        var url = URL.createObjectURL(result.blob);
+        var image = new Image();
+        image.onload = function () {
+          finishRecreatorImage(image, result.meta);
+          URL.revokeObjectURL(url);
+          runButton.disabled = false;
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          runButton.disabled = false;
+          toast("The recreation was generated but could not be displayed.");
+        };
+        image.src = url;
+      })
+      .catch(function (error) {
+        console.warn("Recreator API unavailable; using local trace.", error);
+        toast(error.message + " Using browser tracing instead.");
+        runRecreatorLocal();
+        runButton.disabled = false;
+      });
+  }
+
+  function downloadRecreated() {
+    if (!recreatorOutput) return;
+    var canvas = document.createElement("canvas");
+    canvas.width = recreatorOutput.width;
+    canvas.height = recreatorOutput.height;
+    canvas.getContext("2d").putImageData(
+      new ImageData(new Uint8ClampedArray(recreatorOutput.data), canvas.width, canvas.height), 0, 0
+    );
+    canvas.toBlob(function (blob) {
+      if (blob) downloadBlob(blob, "kolamaya-recreated.png");
+      else toast("PNG export failed.");
+    }, "image/png");
+  }
+
   /* ---------------- analyzer ---------------- */
   var analyzeImageData = null;
   var analyzeSourceBlob = null;
@@ -1015,6 +1389,34 @@
     });
     document.getElementById("complete-engine").addEventListener("change", function () {
       if (completeImage) runComplete();
+    });
+
+    // part-to-whole reconstruction
+    bindDropZone("fragment-drop", "fragment-file", onFragmentFile);
+    document.getElementById("fragment-run").addEventListener("click", runFragmentReconstruction);
+    document.getElementById("fragment-download").addEventListener("click", downloadFragment);
+    document.getElementById("fragment-placement").addEventListener("change", function () {
+      if (fragmentImage) runFragmentReconstruction();
+    });
+    document.getElementById("fragment-style").addEventListener("change", function () {
+      if (fragmentImage) runFragmentReconstruction();
+    });
+
+    // kolam recreator
+    bindDropZone("recreator-drop", "recreator-file", onRecreatorFile);
+    document.getElementById("recreator-run").addEventListener("click", runRecreator);
+    document.getElementById("recreator-download").addEventListener("click", downloadRecreated);
+    document.getElementById("recreator-method").addEventListener("change", function () {
+      if (recreatorImage) runRecreator();
+    });
+    document.getElementById("recreator-palette").addEventListener("change", function () {
+      if (recreatorImage) runRecreator();
+    });
+    document.getElementById("recreator-thickness").addEventListener("input", function (event) {
+      document.getElementById("recreator-thickness-value").textContent = event.target.value;
+    });
+    document.getElementById("recreator-thickness").addEventListener("change", function () {
+      if (recreatorImage) runRecreator();
     });
 
     // analyzer

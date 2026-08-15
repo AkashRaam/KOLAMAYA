@@ -61,6 +61,39 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.mimetype, "image/png")
         self.assertEqual(response.headers["X-Kolamaya-Engine"], "kolamaya-hybrid-v1")
 
+    def test_fragment_reconstruction(self):
+        response = self.client.post(
+            "/api/reconstruct",
+            data={
+                "image": (sample_image(), "fragment.png"),
+                "placement": "auto",
+                "style": "mirror4",
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+        self.assertEqual(response.headers["X-Kolamaya-Engine"], "kolamaya-fragment-v1")
+        self.assertIn(response.headers["X-Kolamaya-Placement"], {
+            "top-left", "top-right", "bottom-left", "bottom-right"
+        })
+
+    def test_kolam_recreator(self):
+        response = self.client.post(
+            "/api/recreate",
+            data={
+                "image": (sample_image(), "complete-kolam.png"),
+                "method": "auto",
+                "palette": "heritage",
+                "thickness": "2",
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+        self.assertEqual(response.headers["X-Kolamaya-Engine"], "kolamaya-recreator-v1")
+        self.assertIn(response.headers["X-Kolamaya-Method"], {"tiles", "trace"})
+
 
 if __name__ == "__main__":
     unittest.main()

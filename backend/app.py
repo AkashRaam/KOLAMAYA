@@ -1,7 +1,7 @@
 """Flask application factory for the KOLAMAYA hackathon demo."""
 from pathlib import Path
 
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 
 from backend.routes.api import api
 
@@ -20,6 +20,14 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     app.register_blueprint(api)
+
+    @app.after_request
+    def cache_policy(response):
+        # The HTML shell and API must never point at stale feature code after a
+        # local restart or Vercel redeployment. Static files use versioned URLs.
+        if request.path == "/" or request.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+        return response
 
     @app.get("/")
     def index():
