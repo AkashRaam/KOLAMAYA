@@ -1,9 +1,0 @@
-__pycache__/
-*.py[cod]
-.venv/
-.env
-.pytest_cache/
-data/
-backend/checkpoints/*.pt
-backend/checkpoints/*.pth
-.DS_Store
